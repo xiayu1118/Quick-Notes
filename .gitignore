@@ -1,1 +1,3 @@
 .vscode/settings.json
+docker/volumes/
+*__pycache__/
