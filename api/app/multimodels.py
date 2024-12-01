@@ -58,10 +58,10 @@ def allowed_file(filename):
 # 导入数据库模块
 import pymysql
 # 导入Flask框架，这个框架可以快捷地实现了一个WSGI应用
-from apps.config import attap_db
+from app.config import attap_db
 from flask import jsonify, request
 import os
-from apps.milvus import (
+from app.milvus import (
     extract_text_from_pdf,
     extract_text_from_word, extract_text_from_txt, extract_text_from_image, split_text, load_file,
     extract_text_from_image1,

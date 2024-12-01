@@ -3,7 +3,7 @@ import pymysql
 # 导入Flask框架，这个框架可以快捷地实现了一个WSGI应用
 from flask import json
 from docx import Document
-from apps.config import attap_db
+from app.config import attap_db
 import json
 from flask import Flask, jsonify, request
 import os
@@ -11,10 +11,10 @@ import os
 import numpy as np
 from flask_cors import CORS
 #蓝图操作
-from apps.multimodels import bp as multimodel_bp
-from apps.AI import bp as AI_bp
-from apps.document import bp as document_bp
-app = Flask(__name__)
+from app.multimodels import bp as multimodel_bp
+from app.AI import bp as AI_bp
+from app.document import bp as document_bp
+from api.app import app
 app.config['JSON_AS_ASCII'] = False
 CORS(app, resource={r'/*': {'origins': '*'}})
 
@@ -267,6 +267,3 @@ def person_page_show():
     finally:
         if conn is not None:
             conn.close()
-
-if __name__ == '__main__':
-    app.run()
