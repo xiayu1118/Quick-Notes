@@ -17,6 +17,7 @@ def generate_random_string(length):
     # 从所有可能的字符中随机选择指定长度的字符
     random_string = ''.join(random.choice(letters_and_digits) for i in range(length))
     return random_string
+
 attap_db={
     'HOST':'127.0.0.1',
     'PORT':3306,
@@ -81,3 +82,15 @@ def uploadimages(username, img):
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
+import os  
+from dotenv import load_dotenv  
+
+# 从 .env 文件加载环境变量  
+load_dotenv()  
+
+class Config:  
+    SQLALCHEMY_DATABASE_URI = (  
+        f"mysql+pymysql://{os.getenv('MYSQL_USER')}:{os.getenv('MYSQL_PASSWORD')}@"  
+        f"localhost/{os.getenv('MYSQL_DATABASE')}"  
+    )  
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
