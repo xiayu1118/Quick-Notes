@@ -6,7 +6,7 @@ bp = Blueprint('AI', __name__, url_prefix='/AI')
 # 导入数据库模块
 import shutil
 import uuid
-from app.mindmap import mindmap_changess
+from apps.mindmap import mindmap_changess
 # 导入Flask框架，这个框架可以快捷地实现了一个WSGI应用
 from werkzeug.utils import secure_filename
 from flask import jsonify, request
@@ -14,7 +14,7 @@ import os
 import erniebot
 from langchain_community.document_loaders import UnstructuredWordDocumentLoader
 from docx import Document
-from app.milvus import (
+from apps.milvus import (
     extract_text_from_pdf,
     extract_text_from_image, process_files, generate_text_summaries
 )
