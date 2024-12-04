@@ -3,7 +3,7 @@ bp = Blueprint('document', __name__, url_prefix='/document')
 # 导入数据库模块
 import pymysql
 # 导入Flask框架，这个框架可以快捷地实现了一个WSGI应用
-from app.config import attap_db, current_time
+from config import attap_db, current_time
 from flask import jsonify, request
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -71,3 +71,4 @@ def get_document():
     ducument_data=list()
     ducument_data = cursor.fetchall()
     return jsonify({'success': 'true', 'content': ducument_data[0][1]})
+

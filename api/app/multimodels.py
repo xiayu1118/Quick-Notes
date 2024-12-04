@@ -1,7 +1,7 @@
 import re
+import shutil
 from datetime import datetime
 import asyncio
-
 from PyPDF2 import PdfReader
 from flask import Blueprint, session,Response, stream_with_context
 from langchain.embeddings.base import Embeddings
@@ -9,9 +9,11 @@ from sentence_transformers import SentenceTransformer
 from typing import List
 from langchain_openai import ChatOpenAI
 import time
+from waterproof import (remove_watermark,process_page,process_pdf,remove_watermark_from_image,process_image1,
+                        process_pdf_and_extract_text)
 import jwt
 import json
-from pymilvus import connections, Collection, utility
+from pymilvus import connections, Collection, utility, MilvusClient
 import random
 from langchain_community.document_loaders import UnstructuredWordDocumentLoader
 from docx import Document
@@ -43,6 +45,7 @@ def generate_token(apikey: str, exp_seconds: int):
             algorithm="HS256",
             headers={"alg": "HS256", "sign_type": "SIGN"},
         )
+
 class SentenceTransformerEmbeddings(Embeddings):
     def __init__(self, model_name: str):
         self.model = SentenceTransformer(model_name)
@@ -58,14 +61,17 @@ def allowed_file(filename):
 # 导入数据库模块
 import pymysql
 # 导入Flask框架，这个框架可以快捷地实现了一个WSGI应用
-from app.config import attap_db
+from config import attap_db
 from flask import jsonify, request
 import os
-from app.milvus import (
+from milvus import (
     extract_text_from_pdf,
     extract_text_from_word, extract_text_from_txt, extract_text_from_image, split_text, load_file,
     extract_text_from_image1,
-    document_to_dict, delete_collection,remove_watermark
+    document_to_dict, delete_collection
+)
+client=MilvusClient(
+    uri="http://127.0.0.1:19530"
 )
 @bp.route("/show_filesss", methods=['POST'])
 def show_filesss():
@@ -123,13 +129,13 @@ def create_words():
     if not os.path.exists(base_path):
         os.makedirs(base_path)
     os.makedirs(base_path, exist_ok=True)
-
+    text_parts = []
     # 如果上传了文件，则保存文件到对应文件夹中
     if doc:
         file_path = os.path.join(base_path, dconame)
         doc.save(file_path)
         # 插入数据库记录
-        sql = "INSERT INTO words (docname, various, times, username, id) VALUES (%s, %s, %s, %s, %s)"
+        sql = "INSERT INTO words (dconame, various, times, username, id) VALUES (%s, %s, %s, %s, %s)"
         val = (dconame, various, times, account, idss1)
         cursor.execute(sql, val)
         conn.commit()
@@ -138,19 +144,14 @@ def create_words():
         documents = []
         pdf_reader=None
         if ext != '.pdf':
-           remove_watermark(file_path,file_path)
-           print("remove_over")
            pdf_reader = load_file(file_path)
         else:
-           pdf_reader= PdfReader(file_path)
-        text_parts = []
+           process_pdf(file_path,file_path)
+           #使用pdfreader效果在去水印之后不好
+           #pdf_reader= PdfReader(file_path)
+           text_parts=process_pdf_and_extract_text(file_path,file_path)
 
-        # 分割PDF内容为多个部分，按页分割或按段落分割
-        print(ext)
-        if ext == '.pdf':
-             for page in pdf_reader.pages:
-                 text_parts.append(page.extract_text())
-        else:
+        if ext != '.pdf':
             text_parts.append(pdf_reader)
         # 将每个部分的内容处理为Document对象
         for i, part in enumerate(text_parts):
@@ -200,7 +201,9 @@ def create_milvus():
     idss1=str(ids)
     base_path = os.path.join('static', 'milvus', account, idss1)
 
-
+    # 如果文件夹不存在，则创建文件夹
+    if not os.path.exists(base_path):
+        os.makedirs(base_path)
     # 如果文件存在并且上传了文件，则直接保存文件到对应文件夹中
     sql1 = "INSERT INTO words1 (username, kname, id, collections_name) VALUES (%s, %s, %s ,%s)"
     val1 = (str(account), str(kname), idss1 , idss1)
@@ -213,12 +216,6 @@ def create_milvus():
     finally:
         cursor.close()
         conn.close()
-    # 如果文件夹不存在，则创建文件夹
-    if not os.path.exists(base_path):
-        os.makedirs(base_path)
-        return jsonify({'success': 'true', 'message': '文件夹创建成功', 'path': base_path}), 200
-    else:
-        return jsonify({'success': 'true', 'message': '文件夹已存在', 'path': base_path}), 200
 
 @bp.route("/show_milvus", methods=['GET', 'POST'])
 def show_milvus():
@@ -246,7 +243,7 @@ def show_milvus():
     wdnmd_data = cursor.fetchall()
     result =list()
     for ids in wdnmd_data:
-        result.append({'date':ids[4],'name':ids[1],'sorts':ids[3]})
+        result.append({'date':ids[2],'name':ids[0],'sorts':ids[1]})
     conn.commit()
     return jsonify({'success': 'true', 'data': result})
 class Document:
@@ -326,7 +323,9 @@ def index_milvus():
     sql= "SELECT * FROM words1 WHERE username = %s AND id = %s"
     cursor.execute(sql, (account, idss,))
     conn.commit()
+
     collections_messages=cursor.fetchall()
+    print(collections_messages)
     collection_id=collections_messages[0][3]
     print(collection_id)
     history =""
@@ -363,7 +362,6 @@ def index_milvus():
             connection_args={"host": "127.0.0.1", "port": "19530"},
             collection_name=collection_name,
         )
-        print(vector)
     else:
         documents = []
         text1 = ""
@@ -408,6 +406,7 @@ def index_milvus():
         streaming=True,
         temperature=0.01
     )
+
     retriever = vector.as_retriever()
     # 将新问题添加到历史上下文
     history+=str(({"role": "user", "content": question}))
@@ -487,3 +486,94 @@ def get_chunks():
     file_url = os.path.join(base_url, 'static', 'milvus', account, idss, dconame).replace("\\", "/")
     print(file_url)
     return jsonify({'success': 'true', 'chunk': chunks, 'file_url': file_url})
+@bp.route('/delete_file', methods=['GET', 'POST'])
+def delete_file():
+    account = request.form.get("username")
+    idss = request.form.get("ids")
+    idss = str(idss)
+    dconame = request.form.get("dconame")
+    file_path = os.path.join(r'C:\Users\lenovo\Desktop\others\EditEnd\apps\static', 'milvus', account, idss, dconame)
+    ext = os.path.splitext(file_path)[1].lower()
+    conn = None
+    conn = pymysql.connect(host=attap_db.get('HOST'), port=attap_db.get('PORT'),
+                           user=attap_db.get('USER'), password=attap_db.get('PASSWORD'),
+                           charset=attap_db.get('CHARSET'))
+    cursor = conn.cursor()
+    conn.commit()
+    cursor.execute('USE editdata')
+    sql="DELETE FROM words WHERE username = %s AND dconame = %s AND id = %s"
+    cursor.execute(sql, (account, dconame ,idss))
+    conn.commit()
+    cursor.execute('SELECT * FROM words1 WHERE id = %s AND username = %s', (idss,account,))
+    conn.commit()
+    result = cursor.fetchone()
+    collections_name = str(result[3])
+    collections_name=("items"+collections_name)
+    source_to_delete = file_path
+    # 转义反斜杠
+    source_to_delete_escaped = source_to_delete.replace("\\", "\\\\")
+    # 构造删除的过滤表达式
+    filter_expr = f"source == '{source_to_delete_escaped}'"
+    # 删除milvus数据库中的向量
+    print(collections_name)
+    res = client.delete(
+        collection_name=collections_name,
+        filter=filter_expr
+    )
+    print(res)
+    if os.path.exists(file_path):
+        # 删除文件
+        os.remove(file_path)
+    return jsonify({'success': 'true','message':'deleted successfully'})
+
+@bp.route('/delete_word', methods=['GET', 'POST'])
+def delete_word():
+    account = request.form.get("username")
+    idss = request.form.get("ids")
+    #知识库整个删除
+    idss = str(idss)
+    conn = None
+    conn = pymysql.connect(host=attap_db.get('HOST'), port=attap_db.get('PORT'),
+                           user=attap_db.get('USER'), password=attap_db.get('PASSWORD'),
+                           charset=attap_db.get('CHARSET'))
+    cursor = conn.cursor()
+    conn.commit()
+    cursor.execute('USE editdata')
+    sql1 = "SELECT * FROM words1 WHERE username = %s AND id = %s"
+    cursor.execute(sql1, (account,idss))
+    conn.commit()
+    temp=cursor.fetchall()
+    print(temp)
+    collections_name=temp[0][3]
+    collections_name="items"+str(collections_name)
+    #取出向量数据库的collection的名字
+    conn.commit()
+    cursor = conn.cursor()
+    conn.commit()
+    cursor.execute('USE editdata')
+    sql2 = "DELETE FROM words1 WHERE username = %s AND id = %s"
+    cursor.execute(sql2, (account, idss))
+    conn.commit()
+    sql3 = "DELETE FROM words WHERE username = %s AND id = %s"
+    cursor.execute(sql3, (account, idss))
+    conn.commit()
+    file_path = os.path.join(r'C:\Users\lenovo\Desktop\others\EditEnd\apps\static', 'milvus', account, idss)
+    try:
+        shutil.rmtree(file_path)
+    except Exception as e:
+        print(f"发生错误: {e}")
+    #把对应的milvus向量知识库代码删除
+    # 连接到 Milvus
+    connections.connect("default", host="127.0.0.1", port="19530")
+    # 指定要删除的集合的名字
+    collection_name = collections_name
+    # 实例化 Collection 对象
+    if utility.has_collection(collection_name):
+        # 实例化 Collection 对象
+        collection = Collection(name=collection_name)
+        # 删除集合
+        collection.drop()
+    return jsonify({'success': 'true','message':'deleted successfully'})
+
+
+

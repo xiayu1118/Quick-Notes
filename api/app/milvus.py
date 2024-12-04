@@ -418,28 +418,6 @@ def process_files(file_path):
     return texts
 
 import PyPDF2
-
-def remove_watermark(input_pdf, output_pdf):
-    # 打开 PDF 文件
-    with open(input_pdf, 'rb') as file:
-        reader = PyPDF2.PdfReader(file)
-        writer = PyPDF2.PdfWriter()
-
-        # 遍历每一页
-        for page_num in range(len(reader.pages)):
-            page = reader.pages[page_num]
-
-            # 如果水印是某一特定内容，比如特定的文字或图片，我们可以在这里做一些处理
-            # 例如通过检查是否包含某一特定的水印对象
-
-            # 添加到输出的 PDF 文件
-            writer.add_page(page)
-
-        # 将去水印后的 PDF 写入新的文件
-        with open(output_pdf, 'wb') as output_file:
-            writer.write(output_file)
-
-
 def load_file(file_path):
     ext = os.path.splitext(file_path)[1].lower()
 

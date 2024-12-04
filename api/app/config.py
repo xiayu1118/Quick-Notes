@@ -2,15 +2,20 @@ import os
 import string
 from datetime import datetime
 from random import random
-
 import cv2
 import numpy as np
 import pymysql
 from flask import jsonify, request
+from unstructured.partition.pdf_image import ocr
 from werkzeug.utils import send_from_directory, secure_filename
+
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+
 def current_time():
     return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+
 def generate_random_string(length):
     # 定义所有可能的字符
     letters_and_digits = string.ascii_letters + string.digits
@@ -18,14 +23,15 @@ def generate_random_string(length):
     random_string = ''.join(random.choice(letters_and_digits) for i in range(length))
     return random_string
 
-attap_db={
-    'HOST':'127.0.0.1',
-    'PORT':3306,
-    'USER':'root',
-    'PASSWORD':'root',
-    'CAHRSET':'utf-8',
-    'NAME':'editdata'
+attap_db = {
+    'HOST': '127.0.0.1',
+    'PORT': 3306,
+    'USER': 'root',
+    'PASSWORD': 'root',
+    'CAHRSET': 'utf-8',
+    'NAME': 'editdata'
 }
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -82,15 +88,5 @@ def uploadimages(username, img):
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
-import os  
-from dotenv import load_dotenv  
 
-# 从 .env 文件加载环境变量  
-load_dotenv()  
 
-class Config:  
-    SQLALCHEMY_DATABASE_URI = (  
-        f"mysql+pymysql://{os.getenv('MYSQL_USER')}:{os.getenv('MYSQL_PASSWORD')}@"  
-        f"localhost/{os.getenv('MYSQL_DATABASE')}"  
-    )  
-    SQLALCHEMY_TRACK_MODIFICATIONS = False

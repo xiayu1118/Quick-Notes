@@ -3,7 +3,7 @@ import pymysql
 # 导入Flask框架，这个框架可以快捷地实现了一个WSGI应用
 from flask import json
 from docx import Document
-from app.config import attap_db
+from config import attap_db
 import json
 from flask import Flask, jsonify, request
 import os
@@ -11,11 +11,20 @@ import os
 import numpy as np
 from flask_cors import CORS
 #蓝图操作
-from app.multimodels import bp as multimodel_bp
-from app.AI import bp as AI_bp
-from app.document import bp as document_bp
-from api.app import app
+from multimodels import bp as multimodel_bp
+from AI import bp as AI_bp
+from document import bp as document_bp
+from excel_match import bp as excel_match_bp
+import logging
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@127.0.0.1:3306/editdata'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 CORS(app, resource={r'/*': {'origins': '*'}})
 
 UPLOAD_FOLDER = os.path.join(app.root_path, 'uploads')
@@ -25,6 +34,7 @@ api_key="ff18ba62b3fd3251ba7a7601db0992b8.9aXqtH8F6ona5kFb"
 app.register_blueprint(multimodel_bp)
 app.register_blueprint(document_bp)
 app.register_blueprint(AI_bp)
+app.register_blueprint(excel_match_bp)
 app.secret_key = os.urandom(24).hex()
 app.config.from_object(__name__)
 from langchain_community.document_loaders import UnstructuredWordDocumentLoader
@@ -37,7 +47,7 @@ UPLOAD_FOLDER = os.path.join(app.root_path, 'uploads')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 api_key="ff18ba62b3fd3251ba7a7601db0992b8.9aXqtH8F6ona5kFb"
 #注册
-@app.route('/registuser', methods=['POST','GET'])
+@app.route('/register', methods=['POST','GET'])
 def get_register_request():
     try:
         # 获取前端传递的用户名和密码
@@ -64,10 +74,8 @@ def get_register_request():
 
 
                     # 插入数据到person表
-                    sql3 = "INSERT INTO `person`(`account`, `email`, `phone`,  `token`, `pet_name`,`password`) VALUES(%s, %s, %s, %s, %s, %s);"
-                    cursor.execute(sql3, (
-                    account, "example@example.com", "1234567890", "12345678910", "李昌霖的马si了", password))
-
+                    sql3 = "INSERT INTO person(`account`, `email`, `phone`,  `token`, `pet_name`,`password`) VALUES(%s, %s, %s, %s, %s, %s);"
+                    cursor.execute(sql3, (account, "example@example.com", "1234567890", "12345678910", "李昌霖的马si了", password))
                     # 提交事务
                     conn.commit()
 
@@ -197,41 +205,48 @@ def personal_page():
         )
         cursor = conn.cursor()
         cursor.execute('use editdata')
-        conn.commit()
-        aaaaa=1
 
-        if aaaaa==1:
-            # 获取前端传递的用户名
-            account = request.json.get('user')
+        # 获取前端传递的用户名
+        account = request.json.get('user')
+        if account is None:
+            return jsonify({'success': 'false', 'message': '用户名未提供'})
 
-            if account is None:
-                return jsonify({'success': 'false', 'message': '用户名未提供'})
+        # SQL查询语句
+        sql = "SELECT * FROM person WHERE account = %s"
+        cursor.execute(sql, (account,))
+        res1 = cursor.fetchall()
 
-            # SQL查询语句，使用%s作为参数占位符
-            sql = "SELECT * FROM person WHERE account = %s"
+        if not res1:
+            # 如果没有找到对应的记录，则插入新记录
+            insert_sql = "INSERT INTO person (account) VALUES (%s)"
+            cursor.execute(insert_sql, (account,))
+            conn.commit()  # 提交插入操作
+
+            # 再次查询以获取最新数据
             cursor.execute(sql, (account,))
             res1 = cursor.fetchall()
-            conn.commit()
-            result_list = [dict((cursor.description[i][0], value) for i, value in enumerate(row)) for row in res1]
-            conn=None
-            sql1 = "SELECT * FROM imgpath WHERE username = %s"
-            cursor.execute(sql1, (account,))
-            res2 = cursor.fetchall()
 
-            if not res2:
-                return jsonify({'success': 'false', 'message': '图片路径未找到'})
-            picname = res2[0][2]  # Assuming the picture name is in the third column of imgpath table
-            base_url = request.host_url  # e.g., "http://localhost:5000/"
-            file_url = os.path.join(base_url, 'static', 'images', account, picname).replace("\\", "/")
-            # Convert result from database to dictionary
-            return jsonify({'success': 'true', 'data': result_list, 'url': file_url})
+        result_list = [dict((cursor.description[i][0], value) for i, value in enumerate(row)) for row in res1]
+
+        # 查询图片路径
+        sql1 = "SELECT * FROM imgpath WHERE username = %s"
+        cursor.execute(sql1, (account,))
+        res2 = cursor.fetchall()
+
+        if not res2:
+            return jsonify({'success': 'false', 'message': '图片路径未找到'})
+        picname = res2[0][2]  # 假设图片名称在imgpath表的第三列
+        base_url = request.host_url  # 例如："http://localhost:5000/"
+        file_url = os.path.join(base_url, 'static', 'images', account, picname).replace("\\", "/")
+
+        # 将结果转换为字典
+        return jsonify({'success': 'true', 'data': result_list, 'url': file_url})
 
     except Exception as e:
-        return jsonify({'success': 'false', 'state': 500, 'message': '发生异常', 'error': str(e)})
+        return jsonify({'success': 'false', 'state': 500, 'message': '错误', 'error': str(e)})
     finally:
         if conn is not None:
             conn.close()
-
 
 @app.route('/person_page_show', methods=['POST', 'GET'])
 def person_page_show():
@@ -267,3 +282,6 @@ def person_page_show():
     finally:
         if conn is not None:
             conn.close()
+
+if __name__ == '__main__':
+    app.run()
