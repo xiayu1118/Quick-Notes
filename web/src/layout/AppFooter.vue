@@ -5,7 +5,7 @@ import { computed } from 'vue';
 const { layoutConfig } = useLayout();
 
 const logoUrl = computed(() => {
-    return `/editFront1/layout/images/${layoutConfig.darkTheme.value ? 'logo-white' : 'logo-dark'}.svg`;
+    return `/editFront1/layout/images/logo.png`;
 });
 </script>
 

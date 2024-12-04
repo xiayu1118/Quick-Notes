@@ -20,7 +20,7 @@ const Register=()=>{
     router.push('/register')
 }
 const logoUrl = computed(() => {
-    return `layout/images/${layoutConfig.darkTheme.value ? 'logo-white' : 'logo-dark'}.svg`;
+    return `layout/images/logo.png`;
 });
 </script>
 
@@ -28,7 +28,7 @@ const logoUrl = computed(() => {
     <div class="surface-0 flex justify-content-center">
         <div id="home" class="landing-wrapper overflow-hidden">
             <div class="py-4 px-4 mx-0 md:mx-6 lg:mx-8 lg:px-8 flex align-items-center justify-content-between relative lg:static mb-3">
-                <a class="flex align-items-center" href="#"> <img :src="logoUrl" alt="Sakai Logo" height="50" class="mr-0 lg:mr-2" /><span class="text-900 font-medium text-2xl line-height-3 mr-8">智能文档</span> </a>
+                <a class="flex align-items-center" href="#"> <img :src="logoUrl" alt="Sakai Logo" height="50" class="mr-0 lg:mr-2" /><span class="text-900 font-medium text-2xl line-height-3 mr-8">匆匆笔记</span> </a>
                 <a class="cursor-pointer block lg:hidden text-700 p-ripple" v-ripple v-styleclass="{ selector: '@next', enterClass: 'hidden', leaveToClass: 'hidden', hideOnOutsideClick: true }">
                     <i class="pi pi-bars text-4xl"></i>
                 </a>
@@ -49,15 +49,10 @@ const logoUrl = computed(() => {
                                 <span>特点</span>
                             </a>
                         </li>
-                        <li>
-                            <a @click="smoothScroll('#pricing')" class="flex m-0 md:ml-5 px-0 py-3 text-900 font-medium line-height-3 p-ripple" v-ripple>
-                                <span>价格</span>
-                            </a>
-                        </li>
                     </ul>
                     <div class="flex justify-content-between lg:block border-top-1 lg:border-top-none surface-border py-3 lg:py-0 mt-3 lg:mt-0">
-                        <Button label="Login" class="p-button-text p-button-rounded border-none font-light line-height-2 text-blue-500" @click="Login"></Button>
-                        <Button label="Register" class="p-button-rounded border-none ml-5 font-light text-white line-height-2 bg-blue-500" @click="Register"></Button>
+                        <button class="rounded-button" @click="Login">登录</button>  
+                        <button class="rounded-button" @click="Register">注册</button>
                     </div>
                 </div>
             </div>
@@ -70,10 +65,10 @@ const logoUrl = computed(() => {
                 <div class="mx-4 md:mx-8 mt-0 md:mt-4">
                     <h1 class="text-6xl font-bold text-gray-900 line-height-2"><span class="font-light block">随心所欲</span>编辑处理文档</h1>
                     <p class="font-normal text-2xl line-height-3 md:mt-3 text-gray-700">我们提供的工具和功能将帮助您更高效地完成文档编辑和处理任务。</p>
-                    <Button label="在线使用" class="p-button-rounded text-xl border-none mt-5 bg-blue-500 font-normal text-white line-height-3 px-3" @click="useOnline"></Button>
+                    <Button label="在线使用" class="rounded-button" @click="useOnline"></Button>
                 </div>
                 <div class="flex justify-content-center md:justify-content-end">
-                    <img src="/demo/images/landing/screen-1.png" alt="Hero Image" class="w-9 md:w-auto" />
+                    
                 </div>
             </div>
 
@@ -215,12 +210,10 @@ const logoUrl = computed(() => {
                         style="border-radius: 20px; background: linear-gradient(0deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)), radial-gradient(77.36% 256.97% at 77.36% 57.52%, #efe1af 0%, #c3dcfa 100%)"
                     >
                         <div class="flex flex-column justify-content-center align-items-center text-center px-3 py-3 md:py-0">
-                            <h3 class="text-gray-900 mb-2">IT先疯队</h3>
-                            <span class="text-gray-600 text-2xl">长沙理工大学</span>
                             <p class="text-gray-900 sm:line-height-2 md:line-height-4 text-2xl mt-4" style="max-width: 800px">
-                                基于大小模型的智能编辑器
+                                Quick Notes
                             </p>
-                            <img src="/demo/images/landing/peak-logo.svg" class="mt-4" alt="Company logo" />
+                            
                         </div>
                     </div>
                 </div>
@@ -234,7 +227,7 @@ const logoUrl = computed(() => {
 
                 <div class="grid mt-8 pb-2 md:pb-8">
                     <div class="flex justify-content-center col-12 lg:col-6 bg-purple-100 p-0 flex-order-1 lg:flex-order-0" style="border-radius: 8px">
-                        <img src="/demo/images/landing/mockup.svg" class="w-11" alt="mockup mobile" />
+                        <img src="" class="w-11"  />
                     </div>
 
                     <div class="col-12 lg:col-6 my-auto flex flex-column lg:align-items-end text-center lg:text-right">
@@ -260,119 +253,19 @@ const logoUrl = computed(() => {
                     </div>
 
                     <div class="flex justify-content-end flex-order-1 sm:flex-order-2 col-12 lg:col-6 bg-yellow-100 p-0" style="border-radius: 8px">
-                        <img src="/demo/images/landing/mockup-desktop.svg" class="w-11" alt="mockup" />
+                        <img src="" class="w-11"  />
                     </div>
                 </div>
             </div>
 
-            <div id="pricing" class="py-4 px-4 lg:px-8 my-2 md:my-4">
-                <div class="text-center">
-                    <h2 class="text-900 font-normal mb-2">价格计划</h2>
-                    <span class="text-600 text-2xl">选择适合您的方案</span>
-                </div>
-
-                <div class="grid justify-content-between mt-8 md:mt-0">
-                    <div class="col-12 lg:col-4 p-0 md:p-3">
-                        <div class="p-3 flex flex-column border-200 pricing-card cursor-pointer border-2 hover:border-primary transition-duration-300 transition-all" style="border-radius: 10px">
-                            <h3 class="text-900 text-center my-5">基础版</h3>
-                            <img src="/demo/images/landing/free.svg" class="w-10 h-10 mx-auto" alt="free" />
-                            <div class="my-5 text-center">
-                                <span class="text-5xl font-bold mr-2 text-900">$0</span>
-                                <span class="text-600">月</span>
-                                <Button label="Get Started" class="block mx-auto mt-4 p-button-rounded border-none ml-3 font-light line-height-2 bg-blue-500 text-white"></Button>
-                            </div>
-                            <Divider class="w-full bg-surface-200"></Divider>
-                            <ul class="my-5 list-none p-0 flex text-900 flex-column">
-                                <li class="py-2">
-                                    <i class="pi pi-fw pi-check text-xl text-cyan-500 mr-2"></i>
-                                    <span class="text-xl line-height-3">响应式布局</span>
-                                </li>
-                                <li class="py-2">
-                                    <i class="pi pi-fw pi-check text-xl text-cyan-500 mr-2"></i>
-                                    <span class="text-xl line-height-3">每日50次AI对话</span>
-                                </li>
-                                <li class="py-2">
-                                    <i class="pi pi-fw pi-check text-xl text-cyan-500 mr-2"></i>
-                                    <span class="text-xl line-height-3">云端存储文件数100+</span>
-                                </li>
-                                <li class="py-2">
-                                    <i class="pi pi-fw pi-check text-xl text-cyan-500 mr-2"></i>
-                                    <span class="text-xl line-height-3"></span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="col-12 lg:col-4 p-0 md:p-3 mt-4 md:mt-0">
-                        <div class="p-3 flex flex-column border-200 pricing-card cursor-pointer border-2 hover:border-primary transition-duration-300 transition-all" style="border-radius: 10px">
-                            <h3 class="text-900 text-center my-5">进阶版</h3>
-                            <img src="/demo/images/landing/startup.svg" class="w-10 h-10 mx-auto" alt="startup" />
-                            <div class="my-5 text-center">
-                                <span class="text-5xl font-bold mr-2 text-900">$1</span>
-                                <span class="text-600">月</span>
-                                <Button label="Try Free" class="block mx-auto mt-4 p-button-rounded border-none ml-3 font-light line-height-2 bg-blue-500 text-white"></Button>
-                            </div>
-                            <Divider class="w-full bg-surface-200"></Divider>
-                            <ul class="my-5 list-none p-0 flex text-900 flex-column">
-                                <li class="py-2">
-                                    <i class="pi pi-fw pi-check text-xl text-cyan-500 mr-2"></i>
-                                    <span class="text-xl line-height-3">响应式布局</span>
-                                </li>
-                                <li class="py-2">
-                                    <i class="pi pi-fw pi-check text-xl text-cyan-500 mr-2"></i>
-                                    <span class="text-xl line-height-3">AI无限token额度</span>
-                                </li>
-                                <li class="py-2">
-                                    <i class="pi pi-fw pi-check text-xl text-cyan-500 mr-2"></i>
-                                    <span class="text-xl line-height-3">云端存储文件数10000+</span>
-                                </li>
-                                <li class="py-2">
-                                    <i class="pi pi-fw pi-check text-xl text-cyan-500 mr-2"></i>
-                                    <span class="text-xl line-height-3"></span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="col-12 lg:col-4 p-0 md:p-3 mt-4 md:mt-0">
-                        <div class="p-3 flex flex-column border-200 pricing-card cursor-pointer border-2 hover:border-primary transition-duration-300 transition-all" style="border-radius: 10px">
-                            <h3 class="text-900 text-center my-5">企业版</h3>
-                            <img src="/demo/images/landing/enterprise.svg" class="w-10 h-10 mx-auto" alt="enterprise" />
-                            <div class="my-5 text-center">
-                                <span class="text-5xl font-bold mr-2 text-900">$999</span>
-                                <span class="text-600">月</span>
-                                <Button label="Get a Quote" class="block mx-auto mt-4 p-button-rounded border-none ml-3 font-light line-height-2 bg-blue-500 text-white"></Button>
-                            </div>
-                            <Divider class="w-full bg-surface-200"></Divider>
-                            <ul class="my-5 list-none p-0 flex text-900 flex-column">
-                                <li class="py-2">
-                                    <i class="pi pi-fw pi-check text-xl text-cyan-500 mr-2"></i>
-                                    <span class="text-xl line-height-3">响应式布局</span>
-                                </li>
-                                <li class="py-2">
-                                    <i class="pi pi-fw pi-check text-xl text-cyan-500 mr-2"></i>
-                                    <span class="text-xl line-height-3">AI无限token额度</span>
-                                </li>
-                                <li class="py-2">
-                                    <i class="pi pi-fw pi-check text-xl text-cyan-500 mr-2"></i>
-                                    <span class="text-xl line-height-3">云端存储文件数10000+</span>
-                                </li>
-                                <li class="py-2">
-                                    <i class="pi pi-fw pi-check text-xl text-cyan-500 mr-2"></i>
-                                    <span class="text-xl line-height-3">专属客服定制您的需求</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            
 
             <div class="py-4 px-4 mx-0 mt-8 lg:mx-8">
                 <div class="grid justify-content-between">
                     <div class="col-12 md:col-2" style="margin-top: -1.5rem">
                         <a @click="smoothScroll('#home')" class="flex flex-wrap align-items-center justify-content-center md:justify-content-start md:mb-0 mb-3 cursor-pointer">
                             <img :src="logoUrl" alt="footer sections" width="50" height="50" class="mr-2" />
-                            <h4 class="font-medium text-3xl text-900">智能文档</h4>
+                            <h4 class="font-medium text-3xl text-900">匆匆笔记</h4>
                         </a>
                     </div>
 
@@ -424,7 +317,24 @@ const logoUrl = computed(() => {
     height: 700px;
     overflow: hidden;
 }
+.rounded-button {  
+  background-color: #7ba3ec; /* 按钮背景色 */  
+  border: none; /* 去掉边框 */  
+  color: white; /* 字体颜色 */  
+  padding: 12px 24px; /* 内边距 */  
+  text-align: center; /* 文本居中 */  
+  text-decoration: none; /* 去掉下划线 */  
+  display: inline-block; /* 让按钮呈现为行内块 */  
+  font-size: 16px; /* 字体大小 */  
+  margin: 4px 2px; /* 外边距 */  
+  cursor: pointer; /* 鼠标悬停时为手形 */  
+  border-radius: 40px; /* 圆角 */  
+  transition: background-color 0.3s; /* 背景色过渡 */  
+}  
 
+.rounded-button:hover {  
+  background-color: #dad8ea; /* 悬停时变色 */  
+}  
 @media screen and (min-width: 768px) {
     #hero {
         -webkit-clip-path: ellipse(150% 87% at 93% 13%);

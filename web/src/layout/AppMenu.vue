@@ -6,7 +6,7 @@ import AppMenuItem from '@/layout/AppMenuItem.vue';
 const pptIcon = new URL('@/assets/PPT2.svg', import.meta.url).href;
 const pdfIcon = new URL('@/assets/PDF3.svg', import.meta.url).href;
 const mindmapIcon = new URL('@/assets/mind-map.svg', import.meta.url).href;
-const wordIcon = new URL('@/assets/Word2.svg', import.meta.url).href;
+const wordIcon = new URL('@/assets/WORD.svg', import.meta.url).href;
 const flowchartIcon = new URL('@/assets/流程图.svg', import.meta.url).href;
 const model = ref([
     {
@@ -19,28 +19,6 @@ const model = ref([
             {
                 label: '创建文档',
                 icon: 'pi pi-fw pi-file',
-                items: [
-                    {
-                        label: 'word',
-                        icon: wordIcon,
-                        to: '/doc'
-                    },
-                    {
-                        label: 'mindmap',
-                        icon: mindmapIcon,
-                        to: '/mindmap'
-                    },
-                    {
-                        label: 'flowchart',
-                        icon: flowchartIcon,
-                        to: '/flowchart'
-                    },
-                    {
-                        label: 'paint',
-                        icon: 'pi pi-fw pi-pencil',
-                        to: '/drawing'
-                    },
-                ]
             },
             {
                 label:'知识库',
